@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/auth.php';
+requireAuth();
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/update_checker.php';
 
@@ -128,7 +130,10 @@ $updateInfo = checkForAppUpdate();
           <i class="fa-solid fa-bars"></i>
         </button>
         <span class="navbar-brand fw-semibold mb-0"><i class="fa-solid fa-notes-medical me-2"></i>Registro de Uso de Material</span>
-        <span class="badge text-bg-light border">v<?= htmlspecialchars($updateInfo['current_version'], ENT_QUOTES, 'UTF-8') ?></span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge text-bg-light border">v<?= htmlspecialchars($updateInfo['current_version'], ENT_QUOTES, 'UTF-8') ?></span>
+          <a href="logout.php" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-right-from-bracket me-1"></i>Salir</a>
+        </div>
       </nav>
 
       <div class="p-3 p-md-4">
