@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/update_checker.php';
@@ -95,22 +94,36 @@ if (isset($_GET['err']) && $_GET['err'] !== '') {
     $error = (string) $_GET['err'];
 }
 
-$totalMateriales = (int) $pdo->query('SELECT COUNT(*) FROM materiales')->fetchColumn();
-$fallasAtendidas = (int) $pdo->query('SELECT COUNT(DISTINCT id_falla) FROM registro_fallas')->fetchColumn();
+$totalMateriales = 0;
+$fallasAtendidas = 0;
+$stockBajo = 0;
+$materiales = [];
+$historial = [];
 
-$stmtStockBajo = $pdo->prepare('SELECT COUNT(*) FROM materiales WHERE stock_actual <= :umbral');
-$stmtStockBajo->execute([':umbral' => $stockBajoUmbral]);
-$stockBajo = (int) $stmtStockBajo->fetchColumn();
+try {
+    $totalMateriales = (int) $pdo->query('SELECT COUNT(*) FROM materiales')->fetchColumn();
+    $fallasAtendidas = (int) $pdo->query('SELECT COUNT(DISTINCT id_falla) FROM registro_fallas')->fetchColumn();
 
-$materiales = $pdo->query('SELECT id, nombre, unidad_medida, stock_actual FROM materiales ORDER BY nombre ASC')->fetchAll();
+    $stmtStockBajo = $pdo->prepare('SELECT COUNT(*) FROM materiales WHERE stock_actual <= :umbral');
+    $stmtStockBajo->execute([':umbral' => $stockBajoUmbral]);
+    $stockBajo = (int) $stmtStockBajo->fetchColumn();
 
-$sqlHistorial = 'SELECT rf.id, rf.id_falla, b.nombre AS brigada, rf.fecha, m.nombre AS material,
-                        m.unidad_medida, rf.cantidad_utilizada, rf.observaciones
-                 FROM registro_fallas rf
-                 INNER JOIN brigadas b ON b.id = rf.brigada_id
-                 INNER JOIN materiales m ON m.id = rf.material_id
-                 ORDER BY rf.fecha DESC, rf.id DESC';
-$historial = $pdo->query($sqlHistorial)->fetchAll();
+    $materiales = $pdo->query('SELECT id, nombre, unidad_medida, stock_actual FROM materiales ORDER BY nombre ASC')->fetchAll();
+
+    $sqlHistorial = 'SELECT rf.id, rf.id_falla, b.nombre AS brigada, rf.fecha, m.nombre AS material,
+                            m.unidad_medida, rf.cantidad_utilizada, rf.observaciones
+                     FROM registro_fallas rf
+                     INNER JOIN brigadas b ON b.id = rf.brigada_id
+                     INNER JOIN materiales m ON m.id = rf.material_id
+                     ORDER BY rf.fecha DESC, rf.id DESC';
+    $historial = $pdo->query($sqlHistorial)->fetchAll();
+} catch (PDOException $e) {
+    if (($e->getCode() ?? '') === '42S02') {
+        $error = 'Faltan tablas en la base de datos. Importa schema.sql en la base activa (felconx_materiales).';
+    } else {
+        $error = 'Error de base de datos: ' . $e->getMessage();
+    }
+}
 $updateInfo = checkForAppUpdate();
 ?>
 <!doctype html>

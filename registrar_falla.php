@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/update_checker.php';
@@ -68,8 +67,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$brigadas = $pdo->query('SELECT id, nombre FROM brigadas ORDER BY nombre ASC')->fetchAll();
-$materiales = $pdo->query('SELECT id, nombre, unidad_medida, stock_actual FROM materiales ORDER BY nombre ASC')->fetchAll();
+$brigadas = [];
+$materiales = [];
+
+try {
+    $brigadas = $pdo->query('SELECT id, nombre FROM brigadas ORDER BY nombre ASC')->fetchAll();
+    $materiales = $pdo->query('SELECT id, nombre, unidad_medida, stock_actual FROM materiales ORDER BY nombre ASC')->fetchAll();
+} catch (PDOException $e) {
+    if (($e->getCode() ?? '') === '42S02') {
+        $error = 'Faltan tablas en la base de datos. Importa schema.sql en la base activa (felconx_materiales).';
+    } else {
+        $error = 'Error de base de datos: ' . $e->getMessage();
+    }
+}
 $updateInfo = checkForAppUpdate();
 ?>
 <!doctype html>
