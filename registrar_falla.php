@@ -95,7 +95,7 @@ $updateInfo = checkForAppUpdate();
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Registrar Falla - Panel de Materiales</title>
+  <title>Registrar Solicitud - Panel SAE</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <style>
@@ -119,8 +119,10 @@ $updateInfo = checkForAppUpdate();
         <h5 class="mb-0"><i class="fa-solid fa-bolt me-2"></i>Panel SAE</h5>
       </div>
       <nav class="nav flex-column p-2">
-        <a class="nav-link rounded mb-1" href="index.php"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a>
-        <a class="nav-link active rounded mb-1" href="registrar_falla.php"><i class="fa-solid fa-triangle-exclamation me-2"></i>Registrar Falla</a>
+        <a class="nav-link rounded mb-1" href="index.php"><i class="fa-solid fa-chart-line me-2"></i>Dashboard</a>
+        <a class="nav-link rounded mb-1" href="brigadas.php"><i class="fa-solid fa-people-group me-2"></i>Brigadas</a>
+        <a class="nav-link rounded mb-1" href="materiales.php"><i class="fa-solid fa-boxes-stacked me-2"></i>Materiales</a>
+        <a class="nav-link active rounded mb-1" href="registrar_falla.php"><i class="fa-solid fa-file-circle-plus me-2"></i>Registrar Solicitud</a>
       </nav>
     </aside>
 
@@ -129,7 +131,7 @@ $updateInfo = checkForAppUpdate();
         <button class="btn btn-outline-secondary d-lg-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
           <i class="fa-solid fa-bars"></i>
         </button>
-        <span class="navbar-brand fw-semibold mb-0"><i class="fa-solid fa-notes-medical me-2"></i>Registro de Uso de Material</span>
+        <span class="navbar-brand fw-semibold mb-0"><i class="fa-solid fa-file-circle-plus me-2"></i>Registro de Solicitud</span>
         <div class="d-flex align-items-center gap-2">
           <span class="badge text-bg-light border">v<?= htmlspecialchars($updateInfo['current_version'], ENT_QUOTES, 'UTF-8') ?></span>
           <a href="logout.php" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-right-from-bracket me-1"></i>Salir</a>
@@ -230,8 +232,10 @@ $updateInfo = checkForAppUpdate();
     </div>
     <div class="offcanvas-body p-2">
       <nav class="nav flex-column">
-        <a class="nav-link rounded mb-1 text-white-50" href="index.php"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a>
-        <a class="nav-link active rounded mb-1 text-white bg-secondary" href="registrar_falla.php"><i class="fa-solid fa-triangle-exclamation me-2"></i>Registrar Falla</a>
+        <a class="nav-link rounded mb-1 text-white-50" href="index.php"><i class="fa-solid fa-chart-line me-2"></i>Dashboard</a>
+        <a class="nav-link rounded mb-1 text-white-50" href="brigadas.php"><i class="fa-solid fa-people-group me-2"></i>Brigadas</a>
+        <a class="nav-link rounded mb-1 text-white-50" href="materiales.php"><i class="fa-solid fa-boxes-stacked me-2"></i>Materiales</a>
+        <a class="nav-link active rounded mb-1 text-white bg-secondary" href="registrar_falla.php"><i class="fa-solid fa-file-circle-plus me-2"></i>Registrar Solicitud</a>
       </nav>
     </div>
   </div>
