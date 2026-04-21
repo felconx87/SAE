@@ -4,8 +4,10 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/update_checker.php';
 
 $error = '';
+$csrfToken = csrfToken();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $csrfInput = $_POST['csrf_token'] ?? '';
     $idFalla = trim($_POST['id_falla'] ?? '');
     $brigadaId = (int) ($_POST['brigada_id'] ?? 0);
     $fecha = $_POST['fecha'] ?? '';
@@ -14,6 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $observaciones = trim($_POST['observaciones'] ?? '');
 
     try {
+        if (!csrfIsValid(is_string($csrfInput) ? $csrfInput : null)) {
+            throw new RuntimeException('Solicitud invalida (CSRF). Recarga la pagina e intenta nuevamente.');
+        }
+
         if ($idFalla === '' || $brigadaId <= 0 || $materialId <= 0 || $fecha === '') {
             throw new RuntimeException('Todos los campos obligatorios deben completarse.');
         }
@@ -158,6 +164,7 @@ $updateInfo = checkForAppUpdate();
               </div>
             <?php else: ?>
               <form method="post">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                 <div class="row g-3">
                   <div class="col-12 col-md-6">
                     <label class="form-label">ID de Falla</label>

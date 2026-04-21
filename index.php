@@ -6,11 +6,17 @@ require_once __DIR__ . '/update_checker.php';
 $mensaje = '';
 $error = '';
 $stockBajoUmbral = 10;
+$csrfToken = csrfToken();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $accion = $_POST['accion'] ?? '';
+    $csrfInput = $_POST['csrf_token'] ?? '';
 
     try {
+        if (!csrfIsValid(is_string($csrfInput) ? $csrfInput : null)) {
+            throw new RuntimeException('Solicitud invalida (CSRF). Recarga la pagina e intenta nuevamente.');
+        }
+
         if ($accion === 'crear_material') {
             $nombre = trim($_POST['nombre'] ?? '');
             $unidad = trim($_POST['unidad_medida'] ?? '');
@@ -278,6 +284,7 @@ $updateInfo = checkForAppUpdate();
                           <i class="fa-solid fa-pen-to-square"></i>
                         </button>
                         <form method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este material?');">
+                          <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                           <input type="hidden" name="accion" value="eliminar_material">
                           <input type="hidden" name="id" value="<?= (int) $m['id'] ?>">
                           <button type="submit" class="btn btn-sm btn-danger">
@@ -356,6 +363,7 @@ $updateInfo = checkForAppUpdate();
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
+          <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
           <input type="hidden" name="accion" value="crear_material">
           <div class="mb-3">
             <label class="form-label">Nombre</label>
@@ -386,6 +394,7 @@ $updateInfo = checkForAppUpdate();
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
+          <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
           <input type="hidden" name="accion" value="editar_material">
           <input type="hidden" name="id" id="edit_id">
           <div class="mb-3">
