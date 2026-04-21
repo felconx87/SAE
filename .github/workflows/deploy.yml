@@ -1,4 +1,4 @@
-name: Deploy Panel Materiales
+name: Deploy Panel Materiales (SSH)
 
 on:
   push:
@@ -7,33 +7,34 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deploy-production
+  group: deploy-production-ssh
   cancel-in-progress: true
 
 jobs:
-  ftp-deploy:
+  deploy-ssh:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Validate required secrets
+        run: |
+          [ -n "${{ secrets.SSH_HOST }}" ] || (echo "Missing secret: SSH_HOST" && exit 1)
+          [ -n "${{ secrets.SSH_USER }}" ] || (echo "Missing secret: SSH_USER" && exit 1)
+          [ -n "${{ secrets.SSH_PRIVATE_KEY }}" ] || (echo "Missing secret: SSH_PRIVATE_KEY" && exit 1)
+          [ -n "${{ secrets.APP_DIR }}" ] || (echo "Missing secret: APP_DIR" && exit 1)
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          protocol: ftp
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/.github/**
-            **/node_modules/**
-            **/cache/**
-            **/README.md
-            **/ACTUALIZACIONES.md
-            **/DEPLOY_AUTOMATICO.md
-            **/schema.sql
-            **/db.php
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script_stop: true
+          script: |
+            set -e
+            cd "${{ secrets.APP_DIR }}"
+            git fetch origin main
+            git checkout main
+            git pull --ff-only origin main
+            mkdir -p cache
+            find . -type d -not -path "./.git/*" -exec chmod 755 {} \;
+            find . -type f -not -path "./.git/*" -exec chmod 644 {} \;

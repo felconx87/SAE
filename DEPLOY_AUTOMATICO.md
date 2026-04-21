@@ -1,37 +1,41 @@
-# Deploy automatico con GitHub Actions
+# Deploy automatico por SSH (GitHub Actions)
 
-Este proyecto ya incluye el workflow:
+El workflow activo es:
 - `.github/workflows/deploy.yml`
 
-Se ejecuta cuando haces `push` a la rama `main` (y tambien manual con `Run workflow`).
+Despliega cuando haces `push` a `main`.
 
-## 1) Crear secretos en GitHub
-En tu repo: `Settings > Secrets and variables > Actions > New repository secret`
+## 1) Secretos en GitHub
+En tu repo: `Settings > Secrets and variables > Actions`
 
-Debes crear:
-- `FTP_SERVER` (ej: `ftp.tudominio.com`)
-- `FTP_USERNAME`
-- `FTP_PASSWORD`
-- `FTP_SERVER_DIR` (ej: `/public_html/panel-materiales/`)
+Crea estos secretos:
+- `SSH_HOST` = `rmsgestion.cl`
+- `SSH_USER` = `felconx`
+- `SSH_PRIVATE_KEY` = contenido completo de tu llave privada (la que corresponde a la publica autorizada en el servidor)
+- `APP_DIR` = `/home/felconx/public_html/app`
 
-## 2) Importante sobre `db.php`
-El deploy excluye `db.php` para no pisar credenciales del servidor.
+## 2) Preparar servidor
+Conectado por SSH al servidor:
 
-Primera vez:
-1. Sube `db.php` manualmente al servidor (con credenciales reales de hosting).
-2. Mantelo fuera de actualizaciones automaticas.
+```bash
+mkdir -p /home/felconx/public_html/app
+cd /home/felconx/public_html/app
+git init
+git remote add origin https://github.com/felconx87/SAE.git
+git fetch origin main
+git checkout -b main origin/main
+```
 
-## 3) Flujo de trabajo recomendado
-1. Trabajas local.
-2. `git add .`
-3. `git commit -m "tu cambio"`
-4. `git push origin main`
-5. GitHub Actions despliega solo.
+## 3) Flujo de deploy
+1. Haces cambios local.
+2. `git push origin main`.
+3. GitHub Actions entra por SSH y ejecuta:
+   - `git fetch origin main`
+   - `git checkout main`
+   - `git pull --ff-only origin main`
+   - ajuste de permisos
 
-## 4) Verificar deploy
-En GitHub: pestaña `Actions` y revisa el job `Deploy Panel Materiales`.
-
-Si falla:
-- Valida usuario/password FTP.
-- Revisa ruta `FTP_SERVER_DIR`.
-- Si tu hosting usa FTPS, cambia en workflow: `protocol: ftps`.
+## 4) Importante para base de datos
+- Mantener `db.php` fuera del repo.
+- Configurar `db.php` directo en servidor.
+- Importar `schema.sql` en `felconx_materiales` solo la primera vez (o en cambios de esquema).
