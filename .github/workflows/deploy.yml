@@ -37,13 +37,12 @@ jobs:
             if [ ! -d ".git" ]; then
               git init
               git remote add origin "https://github.com/${{ github.repository }}.git"
-              git fetch origin main
-              git checkout -B main origin/main
-            else
-              git fetch origin main
-              git checkout main
-              git pull --ff-only origin main
             fi
+            git fetch origin main
+            # Forzar el arbol exactamente al estado remoto y evitar bloqueos por archivos locales.
+            git checkout -B main origin/main
+            git reset --hard origin/main
+            git clean -fd -e db.php -e cache/
             mkdir -p cache
             find . -type d -not -path "./.git/*" -exec chmod 755 {} \;
             find . -type f -not -path "./.git/*" -exec chmod 644 {} \;
